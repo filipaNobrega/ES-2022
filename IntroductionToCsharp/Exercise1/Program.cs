@@ -13,7 +13,7 @@
             }
             else if (x < y)
             {
-                Console.WriteLine($"{x} is less  than {y}");
+                Console.WriteLine($"{x} is less than {y}");
             }
             else
             {
