@@ -1,6 +1,3 @@
-﻿using System;
-using System.Windows.Forms;
-
 namespace CurrencyCalculator.SecondVersion
 {
     public partial class MainForm : Form
@@ -9,6 +6,7 @@ namespace CurrencyCalculator.SecondVersion
 
         public MainForm()
         {
+            _currencyValue = new CurrencyValue();
             InitializeComponent();
         }
 
@@ -62,8 +60,6 @@ namespace CurrencyCalculator.SecondVersion
 
         private void CurrencyCalculatorForm_Load(object sender, EventArgs e)
         {
-            _currencyValue = new CurrencyValue();
-
             _currencyValue.Attach(new CurrencyObserverAdapter(EuroTextBox, CurrencyType.Euros));
             _currencyValue.Attach(new CurrencyObserverAdapter(DollarTextBox, CurrencyType.Dollars));
             _currencyValue.Attach(new CurrencyObserverAdapter(PoundTextBox, CurrencyType.Pounds));

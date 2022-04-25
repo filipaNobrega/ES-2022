@@ -1,6 +1,3 @@
-﻿using System;
-using System.Windows.Forms;
-
 namespace CurrencyCalculator.LastVersion
 {
     public partial class MainForm : Form
@@ -9,6 +6,7 @@ namespace CurrencyCalculator.LastVersion
 
         public MainForm()
         {
+            _currencyValue = new CurrencyValue();
             InitializeComponent();
         }
 
@@ -46,7 +44,7 @@ namespace CurrencyCalculator.LastVersion
 
         private void OnPoundTextBoxChanged(object sender, EventArgs e)
         {
-            if( ! PoundTextBox.ContainsFocus ) return;
+            if (!PoundTextBox.ContainsFocus) return;
 
             if (double.TryParse(PoundTextBox.Text, out double pounds))
             {
@@ -62,14 +60,12 @@ namespace CurrencyCalculator.LastVersion
 
         private void CurrencyCalculatorForm_Load(object sender, EventArgs e)
         {
-            _currencyValue = new CurrencyValue();
-
             // Event handler memory leaks https://www.spicelogic.com/Blog/net-event-handler-memory-leak-16 (nice article)
 
             // A delegate can be initialized with a lambda expression
             _currencyValue.OnUpdate += (subject, data) =>
             {
-                if(CurrencyType.Euros == (CurrencyType) data) return;
+                if (CurrencyType.Euros == (CurrencyType)data) return;
                 EuroTextBox.Text = string.Format("{0}", _currencyValue[CurrencyType.Euros]);
             };
 

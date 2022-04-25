@@ -1,6 +1,3 @@
-﻿using System;
-using System.Windows.Forms;
-
 namespace CurrencyCalculator.FirstVersion
 {
     public partial class MainForm : Form
