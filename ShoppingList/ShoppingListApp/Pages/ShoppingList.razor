@@ -1,0 +1,72 @@
+﻿@page "/"
+@page "/shoppinglist"
+
+<PageTitle>Shopping List</PageTitle>
+
+<h1>My Shopping List</h1>
+
+<div class="btn-group mb-2">
+    <button class="btn btn-secondary" disabled="@(!canUndo)" @onclick="Undo">
+        <span class="oi oi-action-undo" aria-hidden="true"></span> Undo
+    </button>
+    <button class="btn btn-secondary" disabled="@(!canRedo)" @onclick="Redo">
+        <span class="oi oi-action-redo" aria-hidden="true"></span> Redo
+    </button>
+</div>
+
+<div class="text-dark">@items.Count(i => !i.IsBought) items</div>
+
+<form @onsubmit="AddItem">
+    <input class="form-control" type="text" @bind="newItem" placeholder="Add item" />
+</form>
+
+<ul class="list-unstyled mt-2">
+    @for(int i = 0; i < items.Count; i++)
+    {
+        var j = i;
+        <li class="list-item">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="item-@j" checked="@items[j].IsBought" @onchange="(args) => OnCheckedChanged(items[j], args.Value)"/>
+                <label class="form-check-label" for="item-@j">@items[j].Title</label>
+            </div>
+            <div>
+                <button class="btn btn-danger btn-sm" aria-label="Delete" @onclick="() => DeleteItem(items[j])">
+                    <span class="oi oi-trash" aria-hidden="true"></span>
+                </button>
+            </div>
+        </li>
+    }
+</ul>
+
+@code {
+    private List<ListItem> items = new();
+    private string? newItem;
+    private bool canUndo;
+    private bool canRedo;
+    private void Undo() => CommandManager.Instance.Undo();
+    private void Redo() => CommandManager.Instance.Redo();
+    private void AddItem()
+    {
+        if(string.IsNullOrEmpty(newItem)) return;
+        var macro = new MacroCommand();
+        var command1 = new CommandCreateListItem(newItem);
+        command1.Execute();
+        macro.Add(command1);
+        var command2 = new CommandAddListItem(items, command1.Item);
+        macro.Add(command2);
+        CommandManager.Instance.Execute(macro);
+        newItem = null;
+    }
+    private void DeleteItem(ListItem item) {}
+    private void OnCheckedChanged(ListItem item, object? value) {}
+        
+    protected override void OnInitialized()
+    {
+        CommandManager.Instance.Reset();
+        CommandManager.Instance.Notify += (s, e) =>
+        {
+            canUndo = CommandManager.Instance.HasUndo;
+            canRedo = CommandManager.Instance.HasRedo;
+        };
+    }
+}

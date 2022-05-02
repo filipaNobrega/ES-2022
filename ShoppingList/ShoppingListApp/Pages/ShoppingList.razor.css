@@ -1,0 +1,11 @@
+﻿input[type="checkbox"]:checked ~ label {
+    text-decoration: line-through;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+    border-bottom: 1px solid lightgray;
+}
