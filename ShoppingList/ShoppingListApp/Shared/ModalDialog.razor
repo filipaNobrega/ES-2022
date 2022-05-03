@@ -1,0 +1,42 @@
+﻿<div class="modal fade show" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">@Title</h5>
+        <button type="button" class="btn-close" aria-label="Close" @onclick="ModalCancel"></button>
+      </div>
+      <div class="modal-body">
+        @ChildContent
+      </div>
+      <div class="modal-footer">
+        @switch (DialogType)
+        {
+          case ModalDialogType.Ok:
+            <button type="button" class="btn btn-secondary" @onclick="ModalOk">Ok</button>
+            break;
+          case ModalDialogType.OkCancel:
+            <button type="button" class="btn btn-secondary" @onclick="ModalCancel">Cancel</button>
+            <button type="button" class="btn btn-primary" @onclick="ModalOk">Ok</button>
+            break;
+          case ModalDialogType.SaveCancel:
+            <button type="button" class="btn btn-secondary" @onclick="ModalCancel">Cancel</button>
+            <button type="submit" form="@FormId" class="btn btn-primary">Save changes</button>
+            break;
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+
+@code {
+  public enum ModalDialogType { Ok, OkCancel, SaveCancel }
+  [Parameter] public string? Title { get; set; }
+  [Parameter] public string? FormId { get; set; }
+  [Parameter] public ModalDialogType? DialogType { get; set; } = ModalDialogType.Ok;
+  [Parameter] public RenderFragment? ChildContent { get; set; }
+  [Parameter] public EventCallback OnCancel { get; set; }
+  [Parameter] public EventCallback OnOk { get; set; }
+  private Task ModalCancel() => OnCancel.InvokeAsync();
+  private Task ModalOk() => OnOk.InvokeAsync();
+}

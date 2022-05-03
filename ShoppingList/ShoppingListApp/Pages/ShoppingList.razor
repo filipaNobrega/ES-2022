@@ -21,15 +21,19 @@
 </form>
 
 <ul class="list-unstyled mt-2">
-    @for(int i = 0; i < items.Count; i++)
+    @for (int i = 0; i < items.Count; i++)
     {
         var j = i;
         <li class="list-item">
             <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="item-@j" checked="@items[j].IsBought" @onchange="(args) => OnCheckedChanged(items[j], args.Value)"/>
+                <input class="form-check-input" type="checkbox" id="item-@j" checked="@items[j].IsBought"
+                @onchange="(args) => OnCheckedChanged(items[j], args.Value)" />
                 <label class="form-check-label" for="item-@j">@items[j].Title</label>
             </div>
             <div>
+                <button class="btn btn-secondary btn-sm" aria-label="Edit" @onclick="() => OpenEditModalDialog(items[j])">
+                    <span class="oi oi-pencil" aria-hidden="true"></span>
+                </button>
                 <button class="btn btn-danger btn-sm" aria-label="Delete" @onclick="() => DeleteItem(items[j])">
                     <span class="oi oi-trash" aria-hidden="true"></span>
                 </button>
@@ -38,16 +42,36 @@
     }
 </ul>
 
+@if (isEditModalDialogOpened)
+{
+    <ModalDialog Title="Edit item" FormId="edit" OnCancel="@CloseEditModalDialog" DialogType="ModalDialog.ModalDialogType.SaveCancel">
+        <EditForm id="edit" Model="@itemEditModel" OnSubmit="@HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label" for="title">Title</label>
+                <div class="col-sm-10">
+                    <InputText id="title" class="form-control" @bind-Value="itemEditModel.Title" />
+                </div>
+            </div>
+        </EditForm>
+    </ModalDialog>
+}
+
 @code {
     private List<ListItem> items = new();
     private string? newItem;
     private bool canUndo;
     private bool canRedo;
+    private bool isEditModalDialogOpened;
+    private ListItemEditModel? itemEditModel;
+    private ListItem? itemToEdit;
+
     private void Undo() => CommandManager.Instance.Undo();
     private void Redo() => CommandManager.Instance.Redo();
     private void AddItem()
     {
-        if(string.IsNullOrEmpty(newItem)) return;
+        if (string.IsNullOrEmpty(newItem)) return;
         var macro = new MacroCommand();
         var command1 = new CommandCreateListItem(newItem);
         command1.Execute();
@@ -57,9 +81,40 @@
         CommandManager.Instance.Execute(macro);
         newItem = null;
     }
-    private void DeleteItem(ListItem item) {}
-    private void OnCheckedChanged(ListItem item, object? value) {}
-        
+    private void DeleteItem(ListItem item)
+    {
+        if (item == null) return;
+        var command1 = new CommandDeleteListItem(items, item);
+        CommandManager.Instance.Execute(command1);
+    }
+    private void OnCheckedChanged(ListItem item, object? value)
+    {
+        if (item == null) return;
+        if (value == null) return;
+        var command1 = new CommandModifyIsBought(item, (bool)value);
+        CommandManager.Instance.Execute(command1);
+    }
+    private void OpenEditModalDialog(ListItem item)
+    {
+        itemToEdit = item;
+        itemEditModel = new ListItemEditModel() { Title = item.Title };
+        isEditModalDialogOpened = true;
+    }
+    private void CloseEditModalDialog()
+    {
+        isEditModalDialogOpened = false;
+        itemToEdit = null;
+        itemEditModel = null;
+    }
+    private void HandleSubmit(EditContext ctx)
+    {
+        if (ctx.Validate())
+        {
+            var command1 = new CommandModifyTitle(itemToEdit, itemEditModel.Title);
+            CommandManager.Instance.Execute(command1);
+            CloseEditModalDialog();
+        }
+    }
     protected override void OnInitialized()
     {
         CommandManager.Instance.Reset();
