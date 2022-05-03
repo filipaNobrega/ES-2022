@@ -1,8 +1,12 @@
+using ShoppingListLibrary.Patterns;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+// Singleton object holds the state for the lifetime of the application
+builder.Services.AddSingleton<CommandManager>();
 
 var app = builder.Build();
 

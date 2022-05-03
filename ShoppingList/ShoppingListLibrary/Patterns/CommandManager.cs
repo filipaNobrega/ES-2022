@@ -2,13 +2,8 @@
 {
     public class CommandManager
     {
-        #region Singleton object holds the state for the lifetime of the application
-        private CommandManager() { }
-        public static CommandManager Instance { get; } = new CommandManager();
-        #endregion
-
-        public event EventHandler Notify;
-        private readonly List<ICommand> _commands = new List<ICommand>();
+        public event EventHandler? Notify;
+        private readonly List<ICommand> _commands = new();
         private int _position = -1;
         public bool HasUndo { get { return _position > -1; } }
         public bool HasRedo { get { return _position < _commands.Count - 1; } }

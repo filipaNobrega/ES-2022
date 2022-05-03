@@ -1,6 +1,8 @@
 ﻿@page "/"
 @page "/shoppinglist"
 
+@inject CommandManager CommandManager;
+
 <PageTitle>Shopping List</PageTitle>
 
 <h1>My Shopping List</h1>
@@ -67,8 +69,8 @@
     private ListItemEditModel? itemEditModel;
     private ListItem? itemToEdit;
 
-    private void Undo() => CommandManager.Instance.Undo();
-    private void Redo() => CommandManager.Instance.Redo();
+    private void Undo() => CommandManager.Undo();
+    private void Redo() => CommandManager.Redo();
     private void AddItem()
     {
         if (string.IsNullOrEmpty(newItem)) return;
@@ -78,21 +80,21 @@
         macro.Add(command1);
         var command2 = new CommandAddListItem(items, command1.Item);
         macro.Add(command2);
-        CommandManager.Instance.Execute(macro);
+        CommandManager.Execute(macro);
         newItem = null;
     }
     private void DeleteItem(ListItem item)
     {
         if (item == null) return;
         var command1 = new CommandDeleteListItem(items, item);
-        CommandManager.Instance.Execute(command1);
+        CommandManager.Execute(command1);
     }
     private void OnCheckedChanged(ListItem item, object? value)
     {
         if (item == null) return;
         if (value == null) return;
         var command1 = new CommandModifyIsBought(item, (bool)value);
-        CommandManager.Instance.Execute(command1);
+        CommandManager.Execute(command1);
     }
     private void OpenEditModalDialog(ListItem item)
     {
@@ -111,17 +113,17 @@
         if (ctx.Validate())
         {
             var command1 = new CommandModifyTitle(itemToEdit, itemEditModel.Title);
-            CommandManager.Instance.Execute(command1);
+            CommandManager.Execute(command1);
             CloseEditModalDialog();
         }
     }
     protected override void OnInitialized()
     {
-        CommandManager.Instance.Reset();
-        CommandManager.Instance.Notify += (s, e) =>
+        CommandManager.Reset();
+        CommandManager.Notify += (s, e) =>
         {
-            canUndo = CommandManager.Instance.HasUndo;
-            canRedo = CommandManager.Instance.HasRedo;
+            canUndo = CommandManager.HasUndo;
+            canRedo = CommandManager.HasRedo;
         };
     }
 }
